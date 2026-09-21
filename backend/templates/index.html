@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ResQCloud Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="logo-section">
+                <div class="logo-icon">R</div>
+
+                <div>
+                    <h2>ResQCloud</h2>
+                    <p>Cloud Resilience</p>
+                </div>
+            </div>
+
+            <nav class="navigation">
+
+                <a href="#" class="nav-item active">
+                    <span>▦</span>
+                    Dashboard
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>▣</span>
+                    Backups
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>↻</span>
+                    Recovery
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>⚠</span>
+                    Incidents
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>▤</span>
+                    Audit Logs
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>⚙</span>
+                    Settings
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>Detect Fast.</p>
+                <p>Recover Faster.</p>
+                <p>Protect What Matters.</p>
+            </div>
+
+        </aside>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Header -->
+            <header class="top-header">
+
+                <div>
+                    <p class="page-label">OVERVIEW</p>
+                    <h1>Infrastructure Dashboard</h1>
+                    <p class="page-description">
+                        Monitor your cloud infrastructure and recovery readiness.
+                    </p>
+                </div>
+
+                <div class="header-status">
+                    <span class="status-dot"></span>
+                    System Online
+                </div>
+
+            </header>
+
+
+            <!-- Summary Cards -->
+            <section class="summary-cards">
+
+                <div class="summary-card">
+                    <div class="card-heading">
+                        <span>Infrastructure</span>
+                        <span class="card-icon">☁</span>
+                    </div>
+
+                    <h2 id="infrastructure-status">Loading...</h2>
+                    <p>Current infrastructure status</p>
+                </div>
+
+
+                <div class="summary-card">
+                    <div class="card-heading">
+                        <span>Backup Status</span>
+                        <span class="card-icon">▣</span>
+                    </div>
+
+                    <h2 id="backup-status">Loading...</h2>
+                    <p>Backup service availability</p>
+                </div>
+
+
+                <div class="summary-card">
+                    <div class="card-heading">
+                        <span>Active Incidents</span>
+                        <span class="card-icon warning">⚠</span>
+                    </div>
+
+                    <h2 id="incident-count">0</h2>
+                    <p>Incidents requiring attention</p>
+                </div>
+
+
+                <div class="summary-card">
+                    <div class="card-heading">
+                        <span>Recovery Readiness</span>
+                        <span class="card-icon success">✓</span>
+                    </div>
+
+                    <h2 id="recovery-status">Ready</h2>
+                    <p>Recovery process status</p>
+                </div>
+
+            </section>
+
+
+            <!-- Main Grid -->
+            <section class="dashboard-grid">
+
+                <!-- Infrastructure Overview -->
+                <div class="dashboard-card">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Infrastructure Overview</h2>
+                            <p>Connected application resources</p>
+                        </div>
+
+                        <span class="badge success-badge">Operational</span>
+                    </div>
+
+                    <div id="infrastructure-list" class="resource-list">
+                        <p class="loading-message">
+                            Loading infrastructure resources...
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Backup Summary -->
+                <div class="dashboard-card">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Backup Summary</h2>
+                            <p>Latest backup information</p>
+                        </div>
+
+                        <span class="badge info-badge">Development</span>
+                    </div>
+
+                    <div id="backup-list" class="backup-list">
+                        <p class="loading-message">
+                            Loading backup information...
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Recovery Requests -->
+                <div class="dashboard-card">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Recovery Requests</h2>
+                            <p>Recent recovery operations</p>
+                        </div>
+                    </div>
+
+                    <div class="empty-state">
+                        <div class="empty-icon">↻</div>
+                        <h3>No recovery requests</h3>
+                        <p>
+                            Recovery requests will appear here when created.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Incident Overview -->
+                <div class="dashboard-card">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Incident Overview</h2>
+                            <p>Infrastructure incidents</p>
+                        </div>
+                    </div>
+
+                    <div class="empty-state">
+                        <div class="empty-icon">✓</div>
+                        <h3>No active incidents</h3>
+                        <p>
+                            No incidents have been recorded yet.
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Footer -->
+            <footer class="page-footer">
+                <p>ResQCloud © 2026 | Cloud Resilience Platform</p>
+                <p id="last-updated">Last updated: Not available</p>
+            </footer>
+
+        </main>
+
+    </div>
+
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>
