@@ -48,4 +48,4 @@ override.tf.json
 *_override.tf.json
 
 # Docker
-docker-compose.override.yml
+docker-compose.override.ymlinfrastructure/*.tfplan
