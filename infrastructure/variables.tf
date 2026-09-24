@@ -33,3 +33,9 @@ variable "admin_ip_cidr" {
     error_message = "admin_ip_cidr must be a valid IPv4 CIDR block."
   }
 }
+
+variable "ec2_instance_type" {
+  description = "EC2 instance type for the ResQCloud server"
+  type        = string
+  default     = "t3.micro"
+}
