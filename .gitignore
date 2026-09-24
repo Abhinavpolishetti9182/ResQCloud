@@ -53,3 +53,5 @@ docker-compose.override.ymlinfrastructure/*.tfplan
 infrastructure/*.tfplan
 
 infrastructure/main.tf.backup
+
+infrastructure/*.backup

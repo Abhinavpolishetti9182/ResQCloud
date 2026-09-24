@@ -27,3 +27,13 @@ output "backup_service_policy_arn" {
   description = "ARN of the ResQCloud backup service IAM policy"
   value       = aws_iam_policy.backup_service_policy.arn
 }
+
+output "resqcloud_ec2_role_name" {
+  description = "IAM role name for the ResQCloud EC2 instance"
+  value       = aws_iam_role.resqcloud_ec2_role.name
+}
+
+output "resqcloud_ec2_instance_profile_name" {
+  description = "EC2 instance profile name for ResQCloud"
+  value       = aws_iam_instance_profile.resqcloud_ec2_profile.name
+}
