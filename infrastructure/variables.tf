@@ -23,3 +23,13 @@ variable "project_name" {
 
   default = "resqcloud"
 }
+
+variable "admin_ip_cidr" {
+  description = "Public IPv4 CIDR allowed to access EC2 through SSH"
+  type        = string
+
+  validation {
+    condition     = can(cidrhost(var.admin_ip_cidr, 0))
+    error_message = "admin_ip_cidr must be a valid IPv4 CIDR block."
+  }
+}

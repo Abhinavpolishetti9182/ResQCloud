@@ -57,3 +57,8 @@ output "public_route_table_id" {
   description = "ID of the ResQCloud public route table"
   value       = aws_route_table.resqcloud_public_route_table.id
 }
+
+output "ec2_security_group_id" {
+  description = "ID of the ResQCloud EC2 security group"
+  value       = aws_security_group.resqcloud_ec2_sg.id
+}
