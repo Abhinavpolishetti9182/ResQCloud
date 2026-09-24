@@ -9,3 +9,8 @@ provider "aws" {
     }
   }
 }
+# Separate provider for IAM resources without default tags
+provider "aws" {
+  alias  = "no_tags"
+  region = var.aws_region
+}

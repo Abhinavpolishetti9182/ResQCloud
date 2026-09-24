@@ -49,3 +49,7 @@ override.tf.json
 
 # Docker
 docker-compose.override.ymlinfrastructure/*.tfplan
+
+infrastructure/*.tfplan
+
+infrastructure/main.tf.backup
