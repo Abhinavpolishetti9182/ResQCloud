@@ -37,3 +37,23 @@ output "resqcloud_ec2_instance_profile_name" {
   description = "EC2 instance profile name for ResQCloud"
   value       = aws_iam_instance_profile.resqcloud_ec2_profile.name
 }
+
+output "vpc_id" {
+  description = "ID of the ResQCloud VPC"
+  value       = aws_vpc.resqcloud_vpc.id
+}
+
+output "public_subnet_id" {
+  description = "ID of the ResQCloud public subnet"
+  value       = aws_subnet.resqcloud_public_subnet.id
+}
+
+output "internet_gateway_id" {
+  description = "ID of the ResQCloud Internet Gateway"
+  value       = aws_internet_gateway.resqcloud_igw.id
+}
+
+output "public_route_table_id" {
+  description = "ID of the ResQCloud public route table"
+  value       = aws_route_table.resqcloud_public_route_table.id
+}
