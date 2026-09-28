@@ -39,3 +39,13 @@ variable "ec2_instance_type" {
   type        = string
   default     = "t3.micro"
 }
+
+variable "ec2_key_name" {
+  description = "Name of the AWS EC2 key pair used for SSH access"
+  type        = string
+
+  validation {
+    condition     = length(trimspace(var.ec2_key_name)) > 0
+    error_message = "ec2_key_name must not be empty."
+  }
+}

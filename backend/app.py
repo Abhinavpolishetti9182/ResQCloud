@@ -24,20 +24,17 @@ BASE_DIR = Path(__file__).resolve().parent
 
 DATABASE_PATH = BASE_DIR / "resqcloud.db"
 
-
 app = Flask(
     __name__,
     template_folder="templates",
     static_folder="static"
 )
 
-
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"sqlite:///{DATABASE_PATH}"
 )
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
 
 db.init_app(app)
 
@@ -519,14 +516,18 @@ def update_recovery_request(request_id):
 
 
 # --------------------------------------------------
+# DATABASE INITIALIZATION
+# --------------------------------------------------
+
+with app.app_context():
+    db.create_all()
+
+
+# --------------------------------------------------
 # APPLICATION STARTUP
 # --------------------------------------------------
 
 if __name__ == "__main__":
-
-    with app.app_context():
-        db.create_all()
-
     app.run(
         host="0.0.0.0",
         port=5000,
