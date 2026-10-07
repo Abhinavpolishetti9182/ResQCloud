@@ -139,3 +139,67 @@ class RecoveryRequest(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+
+class BackupVerification(db.Model):
+    """Persistent record of a backup integrity verification attempt."""
+
+    __tablename__ = "backup_verifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    object_key = db.Column(
+        db.String(1024),
+        nullable=False,
+        index=True
+    )
+
+    expected_checksum = db.Column(
+        db.String(64),
+        nullable=False
+    )
+
+    actual_checksum = db.Column(
+        db.String(64),
+        nullable=True
+    )
+
+    verified = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False
+    )
+
+    status = db.Column(
+        db.String(30),
+        nullable=False,
+        default="pending"
+    )
+
+    message = db.Column(
+        db.Text,
+        nullable=True
+    )
+
+    verified_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        server_default=db.func.current_timestamp()
+    )
+
+class BackupArtifact(db.Model):
+    """Stores the trusted metadata for an uploaded S3 backup."""
+
+    __tablename__ = "backup_artifacts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    backup_id = db.Column(db.Integer, nullable=False, index=True)
+    bucket = db.Column(db.String(255), nullable=False)
+    object_key = db.Column(db.String(1024), nullable=False, unique=True)
+    checksum = db.Column(db.String(64), nullable=False)
+    size_bytes = db.Column(db.BigInteger, nullable=False)
+    status = db.Column(db.String(30), nullable=False, default="uploaded")
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        server_default=db.func.current_timestamp()
+    )

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ResQCloud</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+<header class="header">
+    <div>
+        <h1>ResQCloud</h1>
+        <p>Detect Fast. Recover Faster. Trust by Design.</p>
+    </div>
+
+    <div id="system-status">
+        Checking...
+    </div>
+</header>
+
+
+<main class="container">
+
+    <section class="cards">
+
+        <div class="card">
+            <h3>Infrastructure</h3>
+            <p id="infrastructure-status">
+                Checking...
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Backups</h3>
+            <p id="backup-status">
+                Checking...
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Incidents</h3>
+            <p id="incident-status">
+                Checking...
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Recovery</h3>
+            <p id="recovery-status">
+                Checking...
+            </p>
+        </div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <h2>ResQCloud Architecture</h2>
+
+        <div class="architecture">
+
+            <div class="component">
+                EC2
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component">
+                RDS
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component">
+                S3 Backup
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component">
+                Recovery
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <h2>System Monitoring</h2>
+
+        <div class="metrics">
+
+            <div>
+                <span>CPU</span>
+                <strong id="cpu">--</strong>
+            </div>
+
+            <div>
+                <span>Memory</span>
+                <strong id="memory">--</strong>
+            </div>
+
+            <div>
+                <span>Disk</span>
+                <strong id="disk">--</strong>
+            </div>
+
+            <div>
+                <span>Active Incidents</span>
+                <strong id="incidents">0</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+</html>

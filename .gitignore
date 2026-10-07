@@ -1,58 +1,66 @@
-# Python virtual environment
+﻿# =========================================================
+# ResQCloud - Git Ignore
+# =========================================================
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python virtual environments
 .venv/
 venv/
 env/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
-*.pyd
 
-# Environment files
-.env
-.env.*
-!.env.example
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# IDE settings
-.vscode/
-.idea/
-
-# Local databases
+# Local databases and database backups
 *.db
 *.sqlite
 *.sqlite3
 
-# Logs
-*.log
+# ResQCloud generated/test backup files
+backend/data/
+backend/restored/
+backend/restored_backups/
 
-# Operating system files
+# AWS / private keys
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
 .DS_Store
 Thumbs.db
 
-# Terraform files
+# Logs
+*.log
+
+# Terraform generated files
 .terraform/
 *.tfstate
 *.tfstate.*
-*.tfvars
+*.tfplan
+*.tfplan.*
+*.backup
+crash.log
+crash.*.log
 
-# Terraform sensitive files
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
+# Terraform local variables
+terraform.tfvars
 
-# Docker
-docker-compose.override.ymlinfrastructure/*.tfplan
+# Build / distribution
+build/
+dist/
+*.egg-info/
 
-infrastructure/*.tfplan
-
-infrastructure/main.tf.backup
-
-infrastructure/*.backup
-
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/

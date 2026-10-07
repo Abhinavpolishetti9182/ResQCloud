@@ -4,243 +4,2666 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ResQCloud Dashboard</title>
+    <title>ResQCloud | Cloud Resilience Platform</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <!-- Existing application JavaScript -->
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+        defer>
+    </script>
+
+    <script
+        src="{{ url_for('static', filename='js/dashboard-tabs.js') }}"
+        defer>
+    </script>
+
+    <script
+        src="{{ url_for('static', filename='js/backup-management.js') }}"
+        defer>
+    </script>
+    <script
+    src="{{ url_for('static', filename='js/resqcloud-dashboard.js') }}"
+    defer>
+     </script>
+
+    <!-- New interactive dashboard -->
+    <script
+        src="{{ url_for('static', filename='js/dashboard-cards.js') }}"
+        defer>
+    </script>
+
+    <!-- =====================================================
+         RESQCLOUD DASHBOARD ENHANCEMENTS
+         ===================================================== -->
+
+    <style>
+
+        /* -----------------------------------------------------
+           CLICKABLE DASHBOARD CARDS
+           ----------------------------------------------------- */
+
+        .dashboard-action-card {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+
+            transition:
+                transform 0.22s ease,
+                border-color 0.22s ease,
+                box-shadow 0.22s ease,
+                background 0.22s ease;
+        }
+
+        .dashboard-action-card::after {
+            content: "View details →";
+
+            position: absolute;
+            right: 18px;
+            bottom: 14px;
+
+            font-size: 11px;
+            font-weight: 600;
+
+            color: #7da8e8;
+
+            opacity: 0;
+            transform: translateX(8px);
+
+            transition:
+                opacity 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .dashboard-action-card:hover {
+            transform: translateY(-4px);
+
+            border-color: #3b82f6;
+
+            box-shadow:
+                0 12px 35px rgba(0, 0, 0, 0.24),
+                0 0 0 1px rgba(59, 130, 246, 0.08);
+
+            background: #17243b;
+        }
+
+        .dashboard-action-card:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .dashboard-action-card:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 3px;
+        }
+
+        .dashboard-action-card:active {
+            transform: translateY(-1px);
+        }
+
+
+        /* -----------------------------------------------------
+           LIVE STATUS STRIP
+           ----------------------------------------------------- */
+
+        .dashboard-live-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            margin: 0 0 22px;
+            padding: 13px 16px;
+
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(21, 36, 61, 0.96),
+                    rgba(15, 29, 50, 0.96)
+                );
+        }
+
+        .dashboard-live-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboard-live-dot {
+            width: 9px;
+            height: 9px;
+
+            border-radius: 50%;
+
+            background: #22c55e;
+
+            box-shadow:
+                0 0 0 4px rgba(34, 197, 94, 0.10),
+                0 0 14px rgba(34, 197, 94, 0.45);
+        }
+
+        .dashboard-live-title {
+            color: #dbeafe;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .dashboard-live-description {
+            color: #8198b7;
+            font-size: 12px;
+        }
+
+        .dashboard-last-refresh {
+            color: #7f96b4;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+
+        /* -----------------------------------------------------
+           DASHBOARD CARD FOOTER
+           ----------------------------------------------------- */
+
+        .dashboard-card-hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            margin-top: 12px;
+
+            color: #7793b7;
+            font-size: 11px;
+        }
+
+
+        /* -----------------------------------------------------
+           MODAL
+           ----------------------------------------------------- */
+
+        .dashboard-modal {
+            position: fixed;
+            inset: 0;
+
+            z-index: 99999;
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background: rgba(3, 9, 22, 0.78);
+
+            backdrop-filter: blur(7px);
+        }
+
+        .dashboard-modal.active {
+            display: flex;
+        }
+
+        .dashboard-modal-content {
+            width: min(780px, 100%);
+            max-height: 86vh;
+
+            overflow: hidden;
+
+            border: 1px solid #29405f;
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #14213a,
+                    #0d1729
+                );
+
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.55),
+                0 0 0 1px rgba(59, 130, 246, 0.04);
+
+            animation: dashboardModalIn 0.18s ease-out;
+        }
+
+        @keyframes dashboardModalIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .dashboard-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding: 22px 24px;
+
+            border-bottom: 1px solid #263957;
+        }
+
+        .dashboard-modal-header h3 {
+            margin: 0;
+
+            color: #f3f7ff;
+
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .dashboard-modal-header p {
+            margin: 6px 0 0;
+
+            color: #8fa8c8;
+
+            font-size: 12px;
+        }
+
+        .dashboard-modal-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 36px;
+            height: 36px;
+
+            border: 1px solid #344b6a;
+            border-radius: 9px;
+
+            background: transparent;
+            color: #dbeafe;
+
+            font-size: 23px;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .dashboard-modal-close:hover {
+            background: #1c2b44;
+            border-color: #4c6c96;
+        }
+
+        .dashboard-modal-body {
+            max-height: 58vh;
+            overflow-y: auto;
+
+            padding: 24px;
+        }
+
+        .dashboard-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 17px 24px;
+
+            border-top: 1px solid #263957;
+        }
+
+
+        /* -----------------------------------------------------
+           MODAL SUMMARY
+           ----------------------------------------------------- */
+
+        .dashboard-detail-summary {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 12px;
+
+            margin-bottom: 18px;
+        }
+
+        .dashboard-detail-summary > div {
+            padding: 15px;
+
+            border: 1px solid #293d5d;
+            border-radius: 11px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #101d32,
+                    #0b1526
+                );
+        }
+
+        .dashboard-detail-summary span {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #829abd;
+
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dashboard-detail-summary strong {
+            display: block;
+
+            color: #f4f8ff;
+
+            font-size: 18px;
+        }
+
+
+        /* -----------------------------------------------------
+           DETAIL LIST
+           ----------------------------------------------------- */
+
+        .dashboard-detail-list {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 9px;
+        }
+
+        .dashboard-detail-item {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 18px;
+
+            padding: 14px 16px;
+
+            border: 1px solid #293d5d;
+            border-radius: 11px;
+
+            background: rgba(9, 20, 36, 0.78);
+
+            transition:
+                background 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .dashboard-detail-item:hover {
+            background: #14233a;
+            border-color: #38567e;
+        }
+
+        .dashboard-detail-item strong {
+            display: block;
+
+            color: #eaf2ff;
+
+            font-size: 13px;
+        }
+
+        .dashboard-detail-item small {
+            display: block;
+
+            margin-top: 5px;
+
+            color: #8299b9;
+
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .dashboard-detail-status-group {
+            display: flex;
+
+            align-items: center;
+            justify-content: flex-end;
+
+            flex-wrap: wrap;
+
+            gap: 5px;
+        }
+
+        .dashboard-detail-status {
+            display: inline-flex;
+
+            align-items: center;
+
+            padding: 5px 9px;
+
+            border: 1px solid #2d486c;
+            border-radius: 999px;
+
+            background: #152943;
+
+            color: #b9d5ff;
+
+            font-size: 10px;
+            font-weight: 600;
+
+            white-space: nowrap;
+        }
+
+        .dashboard-detail-status.success {
+            border-color: rgba(34, 197, 94, 0.25);
+            background: rgba(34, 197, 94, 0.08);
+            color: #86efac;
+        }
+
+        .dashboard-detail-status.warning {
+            border-color: rgba(245, 158, 11, 0.25);
+            background: rgba(245, 158, 11, 0.08);
+            color: #fcd34d;
+        }
+
+        .dashboard-detail-status.danger {
+            border-color: rgba(239, 68, 68, 0.28);
+            background: rgba(239, 68, 68, 0.08);
+            color: #fca5a5;
+        }
+
+
+        /* -----------------------------------------------------
+           MODAL STATES
+           ----------------------------------------------------- */
+
+        .dashboard-modal-loading {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            min-height: 160px;
+
+            color: #8fa8c8;
+
+            font-size: 13px;
+        }
+
+        .dashboard-modal-loading::before {
+            content: "";
+
+            width: 16px;
+            height: 16px;
+
+            margin-right: 10px;
+
+            border: 2px solid #314b70;
+            border-top-color: #60a5fa;
+
+            border-radius: 50%;
+
+            animation: dashboardSpinner 0.8s linear infinite;
+        }
+
+        @keyframes dashboardSpinner {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .dashboard-detail-empty {
+            padding: 32px 20px;
+
+            border: 1px dashed #344b6b;
+            border-radius: 11px;
+
+            color: #8198b7;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+        .dashboard-detail-error {
+            padding: 18px;
+
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 11px;
+
+            background: rgba(127, 29, 29, 0.16);
+
+            color: #fca5a5;
+
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .dashboard-detail-note {
+            margin: 13px 0 0;
+
+            color: #758daa;
+
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+
+        /* -----------------------------------------------------
+           OPERATION TABLE ENHANCEMENT
+           ----------------------------------------------------- */
+
+        .dashboard-table-status {
+            display: inline-flex;
+
+            padding: 5px 9px;
+
+            border-radius: 999px;
+
+            background: #172a45;
+            color: #b9d5ff;
+
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .dashboard-table-status.success {
+            background: rgba(34, 197, 94, 0.09);
+            color: #86efac;
+        }
+
+        .dashboard-table-status.warning {
+            background: rgba(245, 158, 11, 0.09);
+            color: #fcd34d;
+        }
+
+        .dashboard-table-status.danger {
+            background: rgba(239, 68, 68, 0.09);
+            color: #fca5a5;
+        }
+
+
+        /* -----------------------------------------------------
+           QUICK ACTIONS
+           ----------------------------------------------------- */
+
+        .dashboard-quick-actions {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 12px;
+
+            margin-top: 20px;
+        }
+
+        .dashboard-quick-action {
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: 1px solid #293d5d;
+            border-radius: 10px;
+
+            background: #111e33;
+
+            color: #dbeafe;
+
+            cursor: pointer;
+
+            text-align: left;
+
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .dashboard-quick-action:hover {
+            transform: translateY(-2px);
+
+            border-color: #3b82f6;
+
+            background: #172640;
+        }
+
+        .dashboard-quick-action-icon {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            width: 31px;
+            height: 31px;
+
+            border-radius: 8px;
+
+            background: #1a2d4a;
+
+            color: #93c5fd;
+
+            font-size: 15px;
+        }
+
+        .dashboard-quick-action strong {
+            display: block;
+
+            font-size: 12px;
+        }
+
+        .dashboard-quick-action span {
+            display: block;
+
+            margin-top: 2px;
+
+            color: #7188a7;
+
+            font-size: 10px;
+        }
+
+
+        /* -----------------------------------------------------
+           MOBILE
+           ----------------------------------------------------- */
+
+        @media (max-width: 900px) {
+
+            .dashboard-quick-actions {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .dashboard-detail-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .dashboard-live-strip {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 7px;
+            }
+
+            .dashboard-last-refresh {
+                white-space: normal;
+            }
+
+            .dashboard-quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-modal {
+                padding: 10px;
+            }
+
+            .dashboard-modal-content {
+                max-height: 92vh;
+            }
+
+            .dashboard-modal-body {
+                max-height: 65vh;
+                padding: 16px;
+            }
+
+            .dashboard-modal-header {
+                padding: 17px;
+            }
+
+            .dashboard-modal-footer {
+                padding: 14px 16px;
+            }
+
+            .dashboard-detail-item {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .dashboard-detail-status-group {
+                justify-content: flex-start;
+            }
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+    </style>
 </head>
 
 <body>
 
-    <div class="dashboard-container">
+<div class="app-layout">
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
 
-            <div class="logo-section">
-                <div class="logo-icon">R</div>
+    <aside class="sidebar">
 
-                <div>
-                    <h2>ResQCloud</h2>
-                    <p>Cloud Resilience</p>
-                </div>
+        <div class="brand">
+
+            <div class="brand-icon">
+                R
             </div>
 
-            <nav class="navigation">
+            <h1>
+                ResQCloud
+            </h1>
 
-                <a href="#" class="nav-item active">
-                    <span>▦</span>
+            <p>
+                Cloud Resilience Platform
+            </p>
+
+        </div>
+
+
+        <div class="nav-label">
+            MAIN MENU
+        </div>
+
+
+        <nav
+            class="navigation"
+            aria-label="Main navigation">
+
+            <a
+                href="#dashboard-tab"
+                class="nav-item active"
+                data-tab-target="dashboard-tab"
+                aria-current="page">
+
+                <span class="nav-icon">
+                    ▦
+                </span>
+
+                <span class="nav-text">
                     Dashboard
-                </a>
+                </span>
 
-                <a href="#" class="nav-item">
-                    <span>▣</span>
+            </a>
+
+
+            <a
+                href="#monitoring-tab"
+                class="nav-item"
+                data-tab-target="monitoring-tab">
+
+                <span class="nav-icon">
+                    ◉
+                </span>
+
+                <span class="nav-text">
+                    Monitoring
+                </span>
+
+            </a>
+
+
+            <a
+                href="#backup-management"
+                class="nav-item"
+                data-tab-target="backup-management">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                <span class="nav-text">
                     Backups
-                </a>
+                </span>
 
-                <a href="#" class="nav-item">
-                    <span>↻</span>
+            </a>
+
+
+            <a
+                href="#recovery-tab"
+                class="nav-item"
+                data-tab-target="recovery-tab">
+
+                <span class="nav-icon">
+                    ↻
+                </span>
+
+                <span class="nav-text">
                     Recovery
-                </a>
+                </span>
 
-                <a href="#" class="nav-item">
-                    <span>⚠</span>
+            </a>
+
+
+            <a
+                href="#incidents-tab"
+                class="nav-item"
+                data-tab-target="incidents-tab">
+
+                <span class="nav-icon">
+                    ⚠
+                </span>
+
+                <span class="nav-text">
                     Incidents
-                </a>
+                </span>
 
-                <a href="#" class="nav-item">
-                    <span>▤</span>
+            </a>
+            <a
+    href="#runbook-tab"
+    class="nav-item"
+    data-tab-target="runbook-tab">
+
+    <span class="nav-icon">
+        ☑
+    </span>
+
+    <span class="nav-text">
+        Runbook
+    </span>
+
+</a>
+
+
+            <a
+                href="#audit-tab"
+                class="nav-item"
+                data-tab-target="audit-tab">
+
+                <span class="nav-icon">
+                    ☷
+                </span>
+
+                <span class="nav-text">
                     Audit Logs
-                </a>
+                </span>
 
-                <a href="#" class="nav-item">
-                    <span>⚙</span>
+            </a>
+
+
+            <a
+                href="#settings-tab"
+                class="nav-item"
+                data-tab-target="settings-tab">
+
+                <span class="nav-icon">
+                    ⚙
+                </span>
+
+                <span class="nav-text">
                     Settings
-                </a>
+                </span>
 
-            </nav>
+            </a>
 
-            <div class="sidebar-footer">
-                <p>Detect Fast.</p>
-                <p>Recover Faster.</p>
-                <p>Protect What Matters.</p>
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <strong>
+                ResQCloud
+            </strong>
+
+            <br>
+
+            Detect fast. Recover faster.
+
+            <br>
+
+            Trust by design.
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN APPLICATION
+         ===================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h2 id="page-title">
+                    Dashboard Overview
+                </h2>
+
+                <p id="page-description">
+                    Monitor your cloud infrastructure and resilience status.
+                </p>
+
             </div>
 
-        </aside>
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                Cloud Resilience Platform
+
+            </div>
+
+        </header>
 
 
-        <!-- Main Content -->
-        <main class="main-content">
+        <!-- =================================================
+             TAB 1 — DASHBOARD
+             ================================================= -->
 
-            <!-- Header -->
-            <header class="top-header">
+        <section
+            id="dashboard-tab"
+            class="tab-panel active">
+
+
+            <div class="page-heading">
+
+                <h2>
+                    Cloud Resilience Overview
+                </h2>
+
+                <p>
+                    Monitor infrastructure, backup status, incidents,
+                    and recovery activity from one place.
+                </p>
+
+            </div>
+
+
+            <!-- LIVE STATUS -->
+
+            <div class="dashboard-live-strip">
+
+                <div class="dashboard-live-left">
+
+                    <span class="dashboard-live-dot"></span>
+
+                    <div>
+
+                        <div class="dashboard-live-title">
+                            ResQCloud Operations Center
+                        </div>
+
+                        <div class="dashboard-live-description">
+                            Dashboard data is connected to the backend APIs.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="dashboard-last-refresh"
+                    class="dashboard-last-refresh">
+
+                    Waiting for data...
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUMMARY CARDS
+                 ================================================= -->
+
+            <div class="stats-grid">
+
+
+                <!-- INFRASTRUCTURE -->
+
+                <article
+                    class="stat-card dashboard-action-card"
+                    data-dashboard-card="infrastructure"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Open infrastructure details"
+                    title="Click to view infrastructure details">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            Infrastructure
+                        </span>
+
+                        <span class="stat-icon">
+                            ☁
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="stat-value"
+                        id="infrastructure-status">
+
+                        --
+
+                    </div>
+
+
+                    <div class="stat-description">
+                        Infrastructure status
+                    </div>
+
+
+                    <div class="dashboard-card-hint">
+                        ● Click to inspect resources
+                    </div>
+
+                </article>
+
+
+                <!-- BACKUPS -->
+
+                <article
+                    class="stat-card dashboard-action-card"
+                    data-dashboard-card="backups"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Open backup details"
+                    title="Click to view backup details">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            Backups
+                        </span>
+
+                        <span class="stat-icon">
+                            ▤
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="stat-value"
+                        id="backup-status">
+
+                        --
+
+                    </div>
+
+
+                    <div class="stat-description">
+                        Backup status summary
+                    </div>
+
+
+                    <div class="dashboard-card-hint">
+                        ● Click to inspect backups
+                    </div>
+
+                </article>
+
+
+                <!-- INCIDENTS -->
+
+                <article
+                    class="stat-card dashboard-action-card"
+                    data-dashboard-card="incidents"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Open incident details"
+                    title="Click to view incidents">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            Incidents
+                        </span>
+
+                        <span class="stat-icon">
+                            ⚠
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="stat-value"
+                        id="incident-count">
+
+                        --
+
+                    </div>
+
+
+                    <div class="stat-description">
+                        Recorded incidents
+                    </div>
+
+
+                    <div class="dashboard-card-hint">
+                        ● Click to inspect incidents
+                    </div>
+
+                </article>
+
+
+                <!-- RECOVERY -->
+
+                <article
+                    class="stat-card dashboard-action-card"
+                    data-dashboard-card="recovery"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Open recovery details"
+                    title="Click to view recovery details">
+
+                    <div class="stat-top">
+
+                        <span class="stat-label">
+                            Recovery
+                        </span>
+
+                        <span class="stat-icon">
+                            ↻
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="stat-value"
+                        id="recovery-status">
+
+                        --
+
+                    </div>
+
+
+                    <div class="stat-description">
+                        Recovery status summary
+                    </div>
+
+
+                    <div class="dashboard-card-hint">
+                        ● Click to inspect recovery
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <!-- =================================================
+                 QUICK ACTIONS
+                 ================================================= -->
+
+            <section class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Resilience Command Center
+                        </h3>
+
+                        <p class="panel-subtitle">
+                            Jump directly to an operational area.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-quick-actions">
+
+
+                    <button
+                        type="button"
+                        class="dashboard-quick-action"
+                        data-tab-target="backup-management">
+
+                        <span class="dashboard-quick-action-icon">
+                            ↑
+                        </span>
+
+                        <span>
+                            <strong>
+                                Backup Management
+                            </strong>
+
+                            <span>
+                                Upload and verify backups
+                            </span>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="dashboard-quick-action"
+                        data-tab-target="recovery-tab">
+
+                        <span class="dashboard-quick-action-icon">
+                            ↻
+                        </span>
+
+                        <span>
+                            <strong>
+                                Recovery Center
+                            </strong>
+
+                            <span>
+                                Track recovery requests
+                            </span>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="dashboard-quick-action"
+                        data-tab-target="incidents-tab">
+
+                        <span class="dashboard-quick-action-icon">
+                            !
+                        </span>
+
+                        <span>
+                            <strong>
+                                Incident Center
+                            </strong>
+
+                            <span>
+                                Review detected incidents
+                            </span>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="dashboard-quick-action"
+                        data-tab-target="audit-tab">
+
+                        <span class="dashboard-quick-action-icon">
+                            ☷
+                        </span>
+
+                        <span>
+                            <strong>
+                                Audit History
+                            </strong>
+
+                            <span>
+                                Review platform activity
+                            </span>
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 INFRASTRUCTURE + BACKUPS
+                 ================================================= -->
+
+            <div class="content-grid">
+
+
+                <!-- INFRASTRUCTURE TABLE -->
+
+                <section class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h3>
+                                Infrastructure Overview
+                            </h3>
+
+                            <p class="panel-subtitle">
+                                Registered infrastructure resources
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="button button-secondary button-small"
+                            data-dashboard-card="infrastructure">
+
+                            Inspect
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Resource
+                                    </th>
+
+                                    <th>
+                                        Type
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="infrastructure-list">
+
+                                <tr>
+
+                                    <td
+                                        colspan="3"
+                                        class="empty-state">
+
+                                        Loading infrastructure resources...
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+
+                <!-- BACKUP TABLE -->
+
+                <section class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h3>
+                                Backup Summary
+                            </h3>
+
+                            <p class="panel-subtitle">
+                                Recently recorded backups
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="button button-secondary button-small"
+                            data-tab-target="backup-management">
+
+                            View All
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Name
+                                    </th>
+
+                                    <th>
+                                        Type
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="backup-list">
+
+                                <tr>
+
+                                    <td
+                                        colspan="3"
+                                        class="empty-state">
+
+                                        Loading backup records...
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- =================================================
+                 WORKFLOW
+                 ================================================= -->
+
+            <section class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            ResQCloud Workflow
+                        </h3>
+
+                        <p class="panel-subtitle">
+                            Incident response lifecycle
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stats-grid">
+
+
+                    <article class="stat-card">
+
+                        <span class="stat-label">
+                            01 — Detect
+                        </span>
+
+                        <div class="stat-description">
+                            Identify infrastructure issues and incidents.
+                        </div>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span class="stat-label">
+                            02 — Analyse
+                        </span>
+
+                        <div class="stat-description">
+                            Collect evidence and investigate the incident.
+                        </div>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span class="stat-label">
+                            03 — Recover
+                        </span>
+
+                        <div class="stat-description">
+                            Evaluate recovery options and operator approval.
+                        </div>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span class="stat-label">
+                            04 — Verify
+                        </span>
+
+                        <div class="stat-description">
+                            Check recovery results and record the outcome.
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+            </section>
+
+        </section>
+
+
+        <!-- =================================================
+             TAB 2 — CLOUDWATCH MONITORING
+             ================================================= -->
+
+        <section
+            id="monitoring-tab"
+            class="tab-panel">
+
+            <div class="page-heading">
+
+                <h2>
+                    CloudWatch Monitoring
+                </h2>
+
+                <p>
+                    View live AWS EC2 CPU, memory, disk, and network metrics collected through Amazon CloudWatch.
+                </p>
+
+            </div>
+
+
+            <section class="panel cloudwatch-monitoring-panel">
+
+            <div class="panel-header">
 
                 <div>
-                    <p class="page-label">OVERVIEW</p>
-                    <h1>Infrastructure Dashboard</h1>
-                    <p class="page-description">
-                        Monitor your cloud infrastructure and recovery readiness.
+                    <h3>Live Infrastructure Monitoring</h3>
+                    <p class="panel-subtitle">
+                        Real-time AWS EC2 metrics collected through Amazon CloudWatch.
                     </p>
                 </div>
 
-                <div class="header-status">
-                    <span class="status-dot"></span>
-                    System Online
+                <div class="monitoring-header-actions">
+
+                    <span
+                        id="metrics-status"
+                        class="monitoring-status">
+                        Loading CloudWatch...
+                    </span>
+
+                    <button
+                        id="metrics-refresh"
+                        type="button"
+                        class="button button-secondary button-small">
+                        Refresh
+                    </button>
+
                 </div>
 
-            </header>
+            </div>
 
 
-            <!-- Summary Cards -->
-            <section class="summary-cards">
+            <div class="monitoring-resource-info">
 
-                <div class="summary-card">
-                    <div class="card-heading">
-                        <span>Infrastructure</span>
-                        <span class="card-icon">☁</span>
+                <div>
+                    <span>EC2 Instance</span>
+                    <strong id="metric-instance-id">--</strong>
+                </div>
+
+                <div>
+                    <span>AWS Region</span>
+                    <strong id="metric-region">--</strong>
+                </div>
+
+                <div>
+                    <span>Last Updated</span>
+                    <strong id="metrics-last-updated">--</strong>
+                </div>
+
+            </div>
+
+
+            <div class="stats-grid monitoring-stats-grid">
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">CPU Utilization</span>
+                        <span class="stat-icon">CPU</span>
                     </div>
+                    <div id="latest-cpu" class="stat-value">--</div>
+                    <div class="stat-description">
+                        EC2 CPU utilization
+                    </div>
+                </article>
 
-                    <h2 id="infrastructure-status">Loading...</h2>
-                    <p>Current infrastructure status</p>
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Memory</span>
+                        <span class="stat-icon">RAM</span>
+                    </div>
+                    <div id="latest-memory" class="stat-value">--</div>
+                    <div class="stat-description">
+                        CloudWatch Agent memory metric
+                    </div>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Disk</span>
+                        <span class="stat-icon">DISK</span>
+                    </div>
+                    <div id="latest-disk" class="stat-value">--</div>
+                    <div class="stat-description">
+                        CloudWatch Agent disk metric
+                    </div>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Network In</span>
+                        <span class="stat-icon">IN</span>
+                    </div>
+                    <div id="latest-network-in" class="stat-value">--</div>
+                    <div class="stat-description">
+                        Latest network input
+                    </div>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Network Out</span>
+                        <span class="stat-icon">OUT</span>
+                    </div>
+                    <div id="latest-network-out" class="stat-value">--</div>
+                    <div class="stat-description">
+                        Latest network output
+                    </div>
+                </article>
+
+            </div>
+
+
+            <div class="monitoring-chart-grid">
+
+                <div class="monitoring-chart-card">
+                    <div class="section-header">
+                        <div>
+                            <h4>CPU Utilization</h4>
+                            <p>Last 30 minutes</p>
+                        </div>
+                    </div>
+                    <canvas id="cpu-chart" width="700" height="260"></canvas>
                 </div>
 
 
-                <div class="summary-card">
-                    <div class="card-heading">
-                        <span>Backup Status</span>
-                        <span class="card-icon">▣</span>
+                <div class="monitoring-chart-card">
+                    <div class="section-header">
+                        <div>
+                            <h4>Memory Utilization</h4>
+                            <p>Last 30 minutes</p>
+                        </div>
                     </div>
-
-                    <h2 id="backup-status">Loading...</h2>
-                    <p>Backup service availability</p>
+                    <canvas id="memory-chart" width="700" height="260"></canvas>
                 </div>
 
 
-                <div class="summary-card">
-                    <div class="card-heading">
-                        <span>Active Incidents</span>
-                        <span class="card-icon warning">⚠</span>
-                    </div>
 
-                    <h2 id="incident-count">0</h2>
-                    <p>Incidents requiring attention</p>
+                <div class="monitoring-chart-card">
+                    <div class="section-header">
+                        <div>
+                            <h4>Disk Utilization</h4>
+                            <p>Last 30 minutes</p>
+                        </div>
+                    </div>
+                    <canvas id="disk-chart" width="700" height="260"></canvas>
                 </div>
 
 
-                <div class="summary-card">
-                    <div class="card-heading">
-                        <span>Recovery Readiness</span>
-                        <span class="card-icon success">✓</span>
+                <div class="monitoring-chart-card">
+                    <div class="section-header">
+                        <div>
+                            <h4>Network In</h4>
+                            <p>Last 30 minutes</p>
+                        </div>
+                    </div>
+                    <canvas id="network-in-chart" width="700" height="260"></canvas>
+                </div>
+
+
+                <div class="monitoring-chart-card">
+                    <div class="section-header">
+                        <div>
+                            <h4>Network Out</h4>
+                            <p>Last 30 minutes</p>
+                        </div>
+                    </div>
+                    <canvas id="network-out-chart" width="700" height="260"></canvas>
+                </div>
+
+            </div>
+
+
+            <div class="monitoring-note">
+                <strong>Monitoring source:</strong>
+                Amazon CloudWatch for the configured EC2 instance.
+                Memory and disk require the CloudWatch Agent to publish
+                the corresponding CWAgent metrics.
+            </div>
+
+            </section>
+
+        </section>
+
+
+        <!-- =================================================
+             TAB 3 — BACKUP MANAGEMENT
+             ================================================= -->
+
+        <section
+            id="backup-management"
+            class="tab-panel backup-panel">
+
+
+            <div class="page-heading">
+
+                <h2>
+                    Backup Management
+                </h2>
+
+                <p>
+                    Upload backup files, store them in AWS S3,
+                    and manage backup records and integrity verification.
+                </p>
+
+            </div>
+
+
+            <section class="backup-upload-card">
+
+                <h3>
+                    Upload New Backup
+                </h3>
+
+                <p>
+                    Select a file to submit it for backup.
+                    The maximum permitted file size is 25 MiB.
+                </p>
+
+
+                <form
+                    id="backup-upload-form"
+                    class="upload-form">
+
+
+                    <div class="form-group">
+
+                        <label for="backup-file">
+                            Choose a backup file
+                        </label>
+
+
+                        <input
+                            id="backup-file"
+                            name="file"
+                            class="file-input"
+                            type="file"
+                            required
+                            accept="*/*"
+                        >
+
+
+                        <span class="form-help">
+                            Maximum size: 25 MiB.
+                            Choose the file you want to back up.
+                        </span>
+
                     </div>
 
-                    <h2 id="recovery-status">Ready</h2>
-                    <p>Recovery process status</p>
+
+                    <button
+                        id="backup-upload-button"
+                        class="button"
+                        type="submit">
+
+                        ↑ Upload Backup
+
+                    </button>
+
+                </form>
+
+
+                <p
+                    id="backup-message"
+                    class="backup-message"
+                    role="status"
+                    aria-live="polite">
+                </p>
+
+            </section>
+
+
+            <section class="panel">
+
+                <div class="backup-toolbar">
+
+                    <div>
+
+                        <h3>
+                            Backup History
+                        </h3>
+
+                        <p class="panel-subtitle">
+                            Review recorded backup operations.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        id="backup-refresh-button"
+                        class="button button-secondary"
+                        type="button">
+
+                        ↻ Refresh History
+
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    ID
+                                </th>
+
+                                <th>
+                                    Name
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Storage Location
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="backup-history-body">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="empty-state">
+
+                                    Backup history will appear here.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
                 </div>
 
             </section>
 
 
-            <!-- Main Grid -->
-            <section class="dashboard-grid">
+            <section class="panel">
 
-                <!-- Infrastructure Overview -->
-                <div class="dashboard-card">
+                <div class="panel-header">
 
-                    <div class="section-header">
-                        <div>
-                            <h2>Infrastructure Overview</h2>
-                            <p>Connected application resources</p>
-                        </div>
+                    <div>
 
-                        <span class="badge success-badge">Operational</span>
-                    </div>
+                        <h3>
+                            Backup Integrity
+                        </h3>
 
-                    <div id="infrastructure-list" class="resource-list">
-                        <p class="loading-message">
-                            Loading infrastructure resources...
+                        <p class="panel-subtitle">
+                            Verify stored data against its expected checksum.
                         </p>
+
                     </div>
 
                 </div>
 
 
-                <!-- Backup Summary -->
-                <div class="dashboard-card">
+                <p
+                    style="
+                        color: var(--muted);
+                        font-size: 12px;
+                        line-height: 1.8;
+                    ">
 
-                    <div class="section-header">
-                        <div>
-                            <h2>Backup Summary</h2>
-                            <p>Latest backup information</p>
-                        </div>
+                    Integrity verification compares the SHA-256
+                    checksum of the stored S3 object with the expected
+                    checksum.
 
-                        <span class="badge info-badge">Development</span>
-                    </div>
+                </p>
 
-                    <div id="backup-list" class="backup-list">
-                        <p class="loading-message">
-                            Loading backup information...
+            </section>
+
+        </section>
+
+
+        <!-- =================================================
+             TAB 4 — RECOVERY
+             ================================================= -->
+
+        <section
+            id="recovery-tab"
+            class="tab-panel">
+
+
+            <div class="page-heading">
+
+                <h2>
+                    Recovery Management
+                </h2>
+
+                <p>
+                    Review recovery requests and track restoration activity.
+                </p>
+
+            </div>
+
+
+            <section class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Recovery Requests
+                        </h3>
+
+                        <p class="panel-subtitle">
+                            Recovery operations recorded by ResQCloud.
                         </p>
+
                     </div>
+
+
+                    <button
+                        type="button"
+                        id="recovery-refresh-button"
+                        class="button button-secondary button-small">
+
+                        ↻ Refresh
+
+                    </button>
 
                 </div>
 
 
-                <!-- Recovery Requests -->
-                <div class="dashboard-card">
+                <div class="table-wrapper">
 
-                    <div class="section-header">
-                        <div>
-                            <h2>Recovery Requests</h2>
-                            <p>Recent recovery operations</p>
-                        </div>
-                    </div>
+                    <table>
 
-                    <div class="empty-state">
-                        <div class="empty-icon">↻</div>
-                        <h3>No recovery requests</h3>
-                        <p>
-                            Recovery requests will appear here when created.
-                        </p>
-                    </div>
+                        <thead>
 
-                </div>
+                            <tr>
+
+                                <th>
+                                    ID
+                                </th>
+
+                                <th>
+                                    Resource
+                                </th>
+
+                                <th>
+                                    Recovery Type
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Reason
+                                </th>
+
+                            </tr>
+
+                        </thead>
 
 
-                <!-- Incident Overview -->
-                <div class="dashboard-card">
+                        <tbody id="recovery-list">
 
-                    <div class="section-header">
-                        <div>
-                            <h2>Incident Overview</h2>
-                            <p>Infrastructure incidents</p>
-                        </div>
-                    </div>
+                            <tr>
 
-                    <div class="empty-state">
-                        <div class="empty-icon">✓</div>
-                        <h3>No active incidents</h3>
-                        <p>
-                            No incidents have been recorded yet.
-                        </p>
-                    </div>
+                                <td
+                                    colspan="5"
+                                    class="empty-state">
+
+                                    Loading recovery requests...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
 
                 </div>
 
             </section>
 
+        </section>
 
-            <!-- Footer -->
-            <footer class="page-footer">
-                <p>ResQCloud © 2026 | Cloud Resilience Platform</p>
-                <p id="last-updated">Last updated: Not available</p>
-            </footer>
 
-        </main>
+        <!-- =================================================
+             TAB 5 — INCIDENTS
+             ================================================= -->
+
+        <section
+            id="incidents-tab"
+            class="tab-panel">
+
+
+            <div class="page-heading">
+
+                <h2>
+                    Incident Management
+                </h2>
+
+                <p>
+                    Review cloud incidents, investigation status,
+                    and response activity.
+                </p>
+
+            </div>
+
+
+            <section class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Incident Overview
+                        </h3>
+
+                        <p class="panel-subtitle">
+                            Detected incidents and current response status.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="incident-refresh-button"
+                        class="button button-secondary button-small">
+
+                        ↻ Refresh
+
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    ID
+                                </th>
+
+                                <th>
+                                    Title
+                                </th>
+
+                                <th>
+                                    Severity
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Description
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="incident-list">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="empty-state">
+
+                                    Loading incidents...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </section>
+
+        <!-- =================================================
+     TAB 6 — RUNBOOK
+     ================================================= -->
+
+<section
+    id="runbook-tab"
+    class="tab-panel">
+
+    <div class="page-heading">
+        <h2>ResQCloud Runbook</h2>
+
+        <p>
+            Follow these operational procedures to detect,
+            analyse, recover from, and verify cloud incidents.
+        </p>
+    </div>
+
+    <div class="content-grid">
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <h3>1. Detect</h3>
+
+                    <p class="panel-subtitle">
+                        Identify infrastructure health problems.
+                    </p>
+                </div>
+            </div>
+
+            <ol>
+                <li>
+                    Open <strong>Monitoring</strong> and review
+                    the latest CloudWatch metrics.
+                </li>
+
+                <li>
+                    Check CPU, memory, disk, and network utilization.
+                </li>
+
+                <li>
+                    Review <strong>Incidents</strong> for newly
+                    detected failures.
+                </li>
+            </ol>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <h3>2. Analyse</h3>
+
+                    <p class="panel-subtitle">
+                        Investigate the incident before recovery.
+                    </p>
+                </div>
+            </div>
+
+            <ol>
+                <li>
+                    Review incident severity, status, and description.
+                </li>
+
+                <li>
+                    Check the affected infrastructure and backup history.
+                </li>
+
+                <li>
+                    Confirm that a valid backup is available.
+                </li>
+            </ol>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <h3>3. Recover</h3>
+
+                    <p class="panel-subtitle">
+                        Restore affected data using a trusted backup.
+                    </p>
+                </div>
+            </div>
+
+            <ol>
+                <li>
+                    Open <strong>Backups</strong> and locate
+                    the required backup.
+                </li>
+
+                <li>
+                    Use <strong>Restore &amp; Verify</strong>.
+                </li>
+
+                <li>
+                    Stop if integrity verification reports
+                    a checksum mismatch.
+                </li>
+            </ol>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <h3>4. Verify</h3>
+
+                    <p class="panel-subtitle">
+                        Confirm recovery and record the outcome.
+                    </p>
+                </div>
+            </div>
+
+            <ol>
+                <li>
+                    Confirm restoration completed successfully.
+                </li>
+
+                <li>
+                    Check restored backup and recovery request status.
+                </li>
+
+                <li>
+                    Review incident and audit history after recovery.
+                </li>
+            </ol>
+
+        </section>
 
     </div>
 
 
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <section class="panel" style="margin-top: 20px;">
+
+        <div class="panel-header">
+            <div>
+
+                <h3>Emergency Recovery Checklist</h3>
+
+                <p class="panel-subtitle">
+                    Use this sequence during a production incident.
+                </p>
+
+            </div>
+        </div>
+
+
+        <div class="stats-grid">
+
+            <article class="stat-card">
+
+                <span class="stat-label">
+                    01
+                </span>
+
+                <div class="stat-description">
+                    Check Monitoring and identify the affected resource.
+                </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <span class="stat-label">
+                    02
+                </span>
+
+                <div class="stat-description">
+                    Review the incident and select the recovery source.
+                </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <span class="stat-label">
+                    03
+                </span>
+
+                <div class="stat-description">
+                    Restore only after confirming the backup is trusted.
+                </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <span class="stat-label">
+                    04
+                </span>
+
+                <div class="stat-description">
+                    Verify integrity, recovery status, and incident outcome.
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+</section>
+
+        <!-- =================================================
+             TAB 6 — AUDIT
+             ================================================= -->
+
+        <section
+            id="audit-tab"
+            class="tab-panel">
+
+
+            <div class="page-heading">
+
+                <h2>
+                    Audit Logs
+                </h2>
+
+                <p>
+                    Review backup, verification, and recovery activity.
+                </p>
+
+            </div>
+
+
+            <section class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>
+                            Activity History
+                        </h3>
+
+                        <p class="panel-subtitle">
+                            Platform activity and operational history.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="empty-state">
+
+                    Audit events will appear here when connected
+                    to the audit log API.
+
+                </div>
+
+            </section>
+
+        </section>
+
+
+        <!-- =================================================
+             TAB 7 — SETTINGS
+             ================================================= -->
+
+        <section
+            id="settings-tab"
+            class="tab-panel">
+
+
+            <div class="page-heading">
+
+                <h2>
+                    Settings
+                </h2>
+
+                <p>
+                    View platform configuration and service information.
+                </p>
+
+            </div>
+
+
+            <div class="settings-grid">
+
+
+                <article class="setting-item">
+
+                    <h3>
+                        Platform
+                    </h3>
+
+                    <p>
+                        ResQCloud — Cloud Resilience Platform.
+                    </p>
+
+                </article>
+
+
+                <article class="setting-item">
+
+                    <h3>
+                        Backup Storage
+                    </h3>
+
+                    <p>
+                        AWS S3 is used for backup object storage,
+                        subject to the configured backend settings.
+                    </p>
+
+                </article>
+
+
+                <article class="setting-item">
+
+                    <h3>
+                        Integrity Verification
+                    </h3>
+
+                    <p>
+                        SHA-256 checksum verification can be used
+                        to detect changes to stored backup contents.
+                    </p>
+
+                </article>
+
+
+                <article class="setting-item">
+
+                    <h3>
+                        Security
+                    </h3>
+
+                    <p>
+                        Access permissions and AWS credentials should
+                        be managed securely through the backend and IAM.
+                    </p>
+
+                </article>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             FOOTER
+             ================================================= -->
+
+        <footer class="page-footer">
+
+            <span>
+                ResQCloud © 2026 | Cloud Resilience Platform
+            </span>
+
+            <span id="last-updated">
+                Detect fast. Recover faster.
+            </span>
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     DASHBOARD DETAILS MODAL
+     ========================================================= -->
+
+<div
+    id="dashboard-details-modal"
+    class="dashboard-modal"
+    aria-hidden="true">
+
+
+    <div
+        class="dashboard-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dashboard-modal-title">
+
+
+        <div class="dashboard-modal-header">
+
+            <div>
+
+                <h3 id="dashboard-modal-title">
+                    Details
+                </h3>
+
+                <p>
+                    ResQCloud operational information
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="dashboard-modal-close"
+                class="dashboard-modal-close"
+                aria-label="Close">
+
+                
+
+            </button>
+
+        </div>
+
+
+        <div
+            id="dashboard-modal-body"
+            class="dashboard-modal-body">
+
+        </div>
+
+
+        <div class="dashboard-modal-footer">
+
+            <button
+                type="button"
+                id="dashboard-modal-action"
+                class="button"
+                style="display: none;">
+
+                Open Details
+
+            </button>
+
+
+            <button
+                type="button"
+                id="dashboard-modal-close-footer"
+                class="button button-secondary">
+
+                Close
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 </body>
 </html>
